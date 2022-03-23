@@ -6,7 +6,7 @@ sudo -i
 bash <(curl -s https://raw.githubusercontent.com/arturscheiner/kuberverse-simple/main/kv_master.sh)
 
 
-# cks-worker
+# kv-worker
 sudo -i
 bash <(curl -s https://raw.githubusercontent.com/arturscheiner/kuberverse-simple/main/kv_worker.sh)
 
