@@ -5,12 +5,14 @@ Simple shell scripts to provision k8s clusters
 ```
 sudo -i
 ```
+```
 bash <(curl -s https://raw.githubusercontent.com/arturscheiner/kuberverse-simple/main/kv_master.sh)
 ```
 
 # kv-worker
 ```
 sudo -i
+```
 ```
 bash <(curl -s https://raw.githubusercontent.com/arturscheiner/kuberverse-simple/main/kv_worker.sh)
 ```
