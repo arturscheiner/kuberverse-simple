@@ -119,10 +119,13 @@ EOF
 apt-get install software-properties-common -y
 add-apt-repository -y ppa:projectatomic/ppa
 sudo apt-get -qq -y install podman containers-common
+### install podman
 cat <<EOF | sudo tee /etc/containers/registries.conf
 [registries.search]
 registries = ['docker.io']
 EOF
+
+if [[ $(podman network ls | grep podman) ]]; then podman network rm podman; fi
 
 
 ### start services
