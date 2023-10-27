@@ -102,19 +102,19 @@ echo '1' > /proc/sys/net/ipv4/ip_forward
 
 
 # ### crictl uses containerd as default
-# {
-# cat <<EOF | sudo tee /etc/crictl.yaml
-# runtime-endpoint: unix:///run/containerd/containerd.sock
-# EOF
-# }
+{
+cat <<EOF | sudo tee /etc/crictl.yaml
+runtime-endpoint: unix:///run/containerd/containerd.sock
+EOF
+}
 
 
 # ### kubelet should use containerd
-# {
-# cat <<EOF | sudo tee /etc/default/kubelet
-# KUBELET_EXTRA_ARGS="--container-runtime remote --container-runtime-endpoint unix:///run/containerd/containerd.sock"
-# EOF
-# }
+{
+cat <<EOF | sudo tee /etc/default/kubelet
+KUBELET_EXTRA_ARGS="--container-runtime remote --container-runtime-endpoint unix:///run/containerd/containerd.sock"
+EOF
+}
 
 
 ### install podman
