@@ -167,19 +167,24 @@ GITHUB_URL=https://github.com/etcd-io/etcd/releases/download
 DOWNLOAD_URL=${GOOGLE_URL}
 DOWNLOAD_PATH='/tmp'
 EXTRACT_PATH='/tmp/etcd-download-test'
+MACHINE="$(uname -m)"
 
-rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
-rm -rf /tmp/etcd-download-test && mkdir -p /tmp/etcd-download-test
+if [[ $MACHINE == "x86_64" || $MACHINE == "amd64" ]]; then
+    rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
+    rm -rf /tmp/etcd-download-test && mkdir -p /tmp/etcd-download-test
 
-curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz
-tar xzvf ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz -C ${DOWNLOAD_PATH}/etcd-download-test --strip-components=1
-rm -f ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz
+    curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz
+    tar xzvf ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz -C ${DOWNLOAD_PATH}/etcd-download-test --strip-components=1
+    rm -f ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz
 
-${EXTRACT_PATH}/etcd --version
-${EXTRACT_PATH}/etcdctl version
-${EXTRACT_PATH}/etcdutl version
-mv ${EXTRACT_PATH}/* /usr/bin/
-# rm -rf ${ETCDCTL_VERSION_FULL} ${ETCDCTL_VERSION_FULL}.tar.gz
+    ${EXTRACT_PATH}/etcd --version
+    ${EXTRACT_PATH}/etcdctl version
+    ${EXTRACT_PATH}/etcdutl version
+    mv ${EXTRACT_PATH}/* /usr/bin/
+    # rm -rf ${ETCDCTL_VERSION_FULL} ${ETCDCTL_VERSION_FULL}.tar.gz
+elif
+    snap install etcd
+fi
 
 echo
 echo "### COMMAND TO ADD A WORKER NODE ###"
