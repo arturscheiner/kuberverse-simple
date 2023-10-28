@@ -102,11 +102,11 @@ EOF
 
 
 # ### crictl uses containerd as default
-# {
-# cat <<EOF | sudo tee /etc/crictl.yaml
-# runtime-endpoint: unix:///run/containerd/containerd.sock
-# EOF
-# }
+{
+cat <<EOF | sudo tee /etc/crictl.yaml
+runtime-endpoint: unix:///run/containerd/containerd.sock
+EOF
+}
 
 
 # # ### kubelet should use containerd
