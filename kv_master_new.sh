@@ -144,6 +144,9 @@ kubeadm init --ignore-preflight-errors=NumCPU --skip-token-print
 mkdir -p ~/.kube
 sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config
 
+# Weave Net can be installed onto your CNI-enabled Kubernetes cluster with a single command
+kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
+
 # workaround because https://github.com/weaveworks/weave/issues/3927
 # kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
 # curl -L https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n') -o weave.yaml
@@ -155,11 +158,26 @@ sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config
 
 
 # etcdctl
-# ETCDCTL_VERSION=v3.5.1
-# ETCDCTL_VERSION_FULL=etcd-${ETCDCTL_VERSION}-linux-amd64
-# wget https://github.com/etcd-io/etcd/releases/download/${ETCDCTL_VERSION}/${ETCDCTL_VERSION_FULL}.tar.gz
-# tar xzf ${ETCDCTL_VERSION_FULL}.tar.gz
-# mv ${ETCDCTL_VERSION_FULL}/etcdctl /usr/bin/
+ETCD_VER=v3.5.10
+
+# choose either URL
+GOOGLE_URL=https://storage.googleapis.com/etcd
+GITHUB_URL=https://github.com/etcd-io/etcd/releases/download
+DOWNLOAD_URL=${GOOGLE_URL}
+DOWNLOAD_PATH='/tmp'
+EXTRACT_PATH='/tmp/etcd-download-test'
+
+rm -f /tmp/etcd-${ETCD_VER}-linux-amd64.tar.gz
+rm -rf /tmp/etcd-download-test && mkdir -p /tmp/etcd-download-test
+
+curl -L ${DOWNLOAD_URL}/${ETCD_VER}/etcd-${ETCD_VER}-linux-amd64.tar.gz -o ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz
+tar xzvf ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz -C ${DOWNLOAD_PATH}/etcd-download-test --strip-components=1
+rm -f ${DOWNLOAD_PATH}/etcd-${ETCD_VER}-linux-amd64.tar.gz
+
+${EXTRACT_PATH}/etcd --version
+${EXTRACT_PATH}/etcdctl version
+${EXTRACT_PATH}/etcdutl version
+mv ${EXTRACT_PATH}/* /usr/bin/
 # rm -rf ${ETCDCTL_VERSION_FULL} ${ETCDCTL_VERSION_FULL}.tar.gz
 
 echo
