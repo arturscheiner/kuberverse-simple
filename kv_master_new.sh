@@ -184,7 +184,7 @@ if [[ $MACHINE == "x86_64" || $MACHINE == "amd64" ]]; then
     ${EXTRACT_PATH}/etcdutl version
     mv ${EXTRACT_PATH}/* /usr/bin/
     # rm -rf ${ETCDCTL_VERSION_FULL} ${ETCDCTL_VERSION_FULL}.tar.gz
-elif
+else
     snap install etcd
 fi
 
