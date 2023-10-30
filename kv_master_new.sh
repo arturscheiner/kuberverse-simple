@@ -157,6 +157,8 @@ sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config
 
 # apt-mark unhold kubelet kubeadm kubectl kubernetes-cni
 
+curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/calico.yaml -O
+kubectl apply -f calico.yaml
 
 # etcdctl
 ETCD_VER=v3.5.10
