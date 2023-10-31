@@ -161,7 +161,7 @@ EOF
 # kubectl apply -f calico.yaml
 
 # etcdctl
-# ETCD_VER=v3.5.10
+# ETCD_VER=v3.5.10 s
 
 # # choose either URL
 # GOOGLE_URL=https://storage.googleapis.com/etcd
