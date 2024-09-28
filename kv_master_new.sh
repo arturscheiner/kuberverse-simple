@@ -11,7 +11,7 @@ kubeadm init --ignore-preflight-errors=NumCPU --skip-token-print
 mkdir -p ~/.kube
 sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config
 
-curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/calico.yaml -O
+curl -sS https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/calico.yaml -O
 kubectl apply -f calico.yaml
 
 # etcdctl
