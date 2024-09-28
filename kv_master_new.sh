@@ -2,7 +2,7 @@
 
 # Source: http://kubernetes.io/docs/getting-started-guides/kubeadm
 
-bash <(curl -s https://raw.githubusercontent.com/arturscheiner/kuberverse-simple/main/kv_base_new.sh)
+#bash <(curl -s https://raw.githubusercontent.com/arturscheiner/kuberverse-simple/main/kv_base_new.sh)
 
 ### init k8s
 rm /root/.kube/config || true
