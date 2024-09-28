@@ -8,7 +8,7 @@ KUBE_VERSION=$(curl -sS https://raw.githubusercontent.com/kubernetes/kubernetes/
 
 ### setup terminal
 apt-get update
-apt-get install -y bash-completion binutils apt-transport-https ca-certificates containerd podman
+apt-get install -yq bash-completion binutils apt-transport-https ca-certificates containerd podman
 echo 'colorscheme ron' >> ~/.vimrc
 echo 'set tabstop=2' >> ~/.vimrc
 echo 'set shiftwidth=2' >> ~/.vimrc
@@ -37,12 +37,15 @@ systemctl daemon-reload
 
 ### install packages
 # apt-transport-https may be a dummy package; if so, you can skip that package
-apt-get install -y apt-transport-https ca-certificates curl gpg
+apt-get install -yq apt-transport-https ca-certificates curl gpg
 curl -fsSL https://pkgs.k8s.io/core:/stable:/v$KUBE_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$KUBE_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 apt-get update
-apt-get install -y containerd kubelet kubeadm kubectl kubernetes-cni
+apt-get install -yq containerd kubelet kubeadm kubectl kubernetes-cni
 apt-mark hold kubelet kubeadm kubectl kubernetes-cni
+
+#(Optional) Enable the kubelet service before running kubeadm:
+systemctl enable --now kubelet
 
 modprobe br_netfilter
 echo '1' > /proc/sys/net/ipv4/ip_forward
