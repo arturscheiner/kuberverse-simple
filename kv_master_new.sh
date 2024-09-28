@@ -4,15 +4,6 @@
 
 #bash <(curl -s https://raw.githubusercontent.com/arturscheiner/kuberverse-simple/main/kv_base_new.sh)
 
-### init k8s
-rm /root/.kube/config || true
-kubeadm init --ignore-preflight-errors=NumCPU --skip-token-print
-
-mkdir -p ~/.kube
-sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config
-
-curl -sS https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/calico.yaml -O
-kubectl apply -f calico.yaml
 
 # etcdctl
 ETCD_VER=v3.5.16
@@ -43,6 +34,16 @@ else
 fi
 
 apt -y autoremove
+
+### init k8s
+rm /root/.kube/config || true
+kubeadm init --ignore-preflight-errors=NumCPU --skip-token-print
+
+mkdir -p ~/.kube
+sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config
+
+curl -sS https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/calico.yaml -O
+kubectl apply -f calico.yaml
 
 echo
 echo "### COMMAND TO ADD A WORKER NODE ###"
