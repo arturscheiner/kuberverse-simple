@@ -7,6 +7,7 @@ set -e
 KUBE_VERSION=$(curl -sS https://raw.githubusercontent.com/kubernetes/kubernetes/refs/heads/master/CHANGELOG/README.md | grep -Eo "CHANGELOG-[1-9]+.[1-9]{2}" | head -1 | awk -F- '{print $2}')
 
 ### setup terminal
+apt -y remove needrestart
 apt-get update
 apt-get install -yq bash-completion binutils apt-transport-https ca-certificates containerd podman
 echo 'colorscheme ron' >> ~/.vimrc
@@ -138,3 +139,5 @@ systemctl daemon-reload
 systemctl enable containerd
 systemctl restart containerd
 systemctl enable kubelet && systemctl start kubelet
+
+apt -y install needrestart
