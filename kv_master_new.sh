@@ -4,12 +4,11 @@
 
 set -e
 
-#KUBE_VERSION=1.23.4
-
+KUBE_VERSION=$(curl -sS https://raw.githubusercontent.com/kubernetes/kubernetes/refs/heads/master/CHANGELOG/README.md | grep -Eo "CHANGELOG-[1-9]+.[1-9]{2}" | head -1 | awk -F- '{print $2}')
 
 ### setup terminal
 apt-get update
-apt-get install -y bash-completion binutils
+apt-get install -y bash-completion binutils apt-transport-https ca-certificates containerd podman
 echo 'colorscheme ron' >> ~/.vimrc
 echo 'set tabstop=2' >> ~/.vimrc
 echo 'set shiftwidth=2' >> ~/.vimrc
@@ -39,8 +38,8 @@ systemctl daemon-reload
 ### install packages
 # apt-transport-https may be a dummy package; if so, you can skip that package
 apt-get install -y apt-transport-https ca-certificates curl gpg
-curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
-echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.28/deb/ /' | sudo tee /etc/apt/sources.list.d/kubernetes.list
+curl -fsSL https://pkgs.k8s.io/core:/stable:/v$KUBE_VERSION/deb/Release.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+echo "deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v$KUBE_VERSION/deb/ /" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 apt-get update
 apt-get install -y containerd kubelet kubeadm kubectl kubernetes-cni
 apt-mark hold kubelet kubeadm kubectl kubernetes-cni
@@ -145,23 +144,11 @@ kubeadm init --ignore-preflight-errors=NumCPU --skip-token-print
 mkdir -p ~/.kube
 sudo cp -i /etc/kubernetes/admin.conf ~/.kube/config
 
-# Weave Net can be installed onto your CNI-enabled Kubernetes cluster with a single command
-#kubectl apply -f https://github.com/weaveworks/weave/releases/download/v2.8.1/weave-daemonset-k8s.yaml
-
-# workaround because https://github.com/weaveworks/weave/issues/3927
-# kubectl apply -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
-# curl -L https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n') -o weave.yaml
-# sed -i 's/ghcr.io\/weaveworks\/launcher/docker.io\/weaveworks/g' weave.yaml
-# kubectl -f weave.yaml apply
-# rm weave.yaml
-
-# apt-mark unhold kubelet kubeadm kubectl kubernetes-cni
-
 curl https://raw.githubusercontent.com/projectcalico/calico/v3.26.3/manifests/calico.yaml -O
 kubectl apply -f calico.yaml
 
 # etcdctl
-ETCD_VER=v3.5.10
+ETCD_VER=v3.5.16
 
 # choose either URL
 GOOGLE_URL=https://storage.googleapis.com/etcd
