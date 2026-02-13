@@ -5,13 +5,13 @@ function bootstrap_ssh_run() {
     local remote_path="/tmp/kvkit_bootstrap.sh"
     
     ui_info "Transferring bootstrap script to ${host}..."
-    scp -o StrictHostKeyChecking=no "$script" "${host}:${remote_path}"
+    scp -i "${KV_KEY_PATH}" -o StrictHostKeyChecking=no "$script" "${host}:${remote_path}"
     
     ui_info "Executing remote bootstrap on ${host}..."
     if [ -n "$capture_file" ]; then
-        ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}" | tee "$capture_file"
+        ssh -i "${KV_KEY_PATH}" -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}" | tee "$capture_file"
     else
-        ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}"
+        ssh -i "${KV_KEY_PATH}" -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}"
     fi
 }
 
@@ -19,12 +19,12 @@ function bootstrap_remote_sync() {
     local host="$1"
     
     ui_info "Syncing configuration to remote host ${host}..."
-    ssh -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.kvkit"
-    scp -o StrictHostKeyChecking=no "${CONFIG_FILE}" "${host}:~/.kvkit/config"
+    ssh -i "${KV_KEY_PATH}" -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.kvkit"
+    scp -i "${KV_KEY_PATH}" -o StrictHostKeyChecking=no "${CONFIG_FILE}" "${host}:~/.kvkit/config"
     
     # Optional: Clone repo to remote host
     ui_info "Setting up kvkit tools on remote host..."
-    ssh -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.kvkit/bin && if [ ! -d ~/.kvkit/bin/kuberverse-simple ]; then git clone https://github.com/arturscheiner/kuberverse-simple.git ~/.kvkit/bin/kuberverse-simple; else cd ~/.kvkit/bin/kuberverse-simple && git pull; fi"
+    ssh -i "${KV_KEY_PATH}" -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.kvkit/bin && if [ ! -d ~/.kvkit/bin/kuberverse-simple ]; then git clone https://github.com/arturscheiner/kuberverse-simple.git ~/.kvkit/bin/kuberverse-simple; else cd ~/.kvkit/bin/kuberverse-simple && git pull; fi"
 }
 
 function bootstrap_local_setup() {
@@ -38,19 +38,19 @@ function bootstrap_local_setup() {
     mkdir -p "${HOME}/.kube"
     
     # Prepare a temporary readable copy on the remote side
-    ssh -t -o StrictHostKeyChecking=no "$host" "sudo cp /etc/kubernetes/admin.conf /tmp/kvkit_admin.conf && sudo chmod 644 /tmp/kvkit_admin.conf"
+    ssh -i "${KV_KEY_PATH}" -t -o StrictHostKeyChecking=no "$host" "sudo cp /etc/kubernetes/admin.conf /tmp/kvkit_admin.conf && sudo chmod 644 /tmp/kvkit_admin.conf"
     
     # Download the temporary file
-    scp -o StrictHostKeyChecking=no "${host}:/tmp/kvkit_admin.conf" "${HOME}/.kube/config"
+    scp -i "${KV_KEY_PATH}" -o StrictHostKeyChecking=no "${host}:/tmp/kvkit_admin.conf" "${HOME}/.kube/config"
     chmod 600 "${HOME}/.kube/config"
     
     # Cleanup remote temporary file (uses -t for sudo password if needed)
-    ssh -t -o StrictHostKeyChecking=no "$host" "sudo rm /tmp/kvkit_admin.conf"
+    ssh -i "${KV_KEY_PATH}" -t -o StrictHostKeyChecking=no "$host" "sudo rm /tmp/kvkit_admin.conf"
     
     # 2. Grab kubectl from control-plane
     ui_info "Grabbing kubectl from ${host}..."
     mkdir -p "${bin_dir}"
-    scp -o StrictHostKeyChecking=no "${host}:/usr/bin/kubectl" "${bin_dir}/kubectl"
+    scp -i "${KV_KEY_PATH}" -o StrictHostKeyChecking=no "${host}:/usr/bin/kubectl" "${bin_dir}/kubectl"
     chmod +x "${bin_dir}/kubectl"
     
     # Inform about PATH

@@ -11,6 +11,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LIB_DIR="${ROOT_DIR}/lib"
 CONFIG_DIR="${HOME}/.kvkit"
 CONFIG_FILE="${CONFIG_DIR}/config"
+export KV_KEY_PATH="${CONFIG_DIR}/keys/id_ed25519"
 
 # Import Core View for UI
 source "${LIB_DIR}/view/ui.sh"

@@ -3,22 +3,23 @@
 # SSH management model for kvkit
 
 function ssh_ensure_keys() {
-    local key_file="${HOME}/.ssh/id_ed25519"
+    local key_file="${KV_KEY_PATH:-${HOME}/.kvkit/keys/id_ed25519}"
+    local key_dir=$(dirname "$key_file")
     
     if [ ! -f "$key_file" ]; then
-        ui_info "No SSH key found. Generating a new Ed25519 key pair..."
-        mkdir -p "${HOME}/.ssh"
-        chmod 700 "${HOME}/.ssh"
+        ui_info "No dedicated KVKit SSH key found. Generating a new Ed25519 key pair..."
+        mkdir -p "$key_dir"
+        chmod 700 "$key_dir"
         ssh-keygen -t ed25519 -N "" -f "$key_file" >/dev/null
-        ui_success "Key pair generated: $key_file"
+        ui_success "Dedicated key pair generated: $key_file"
     else
-        ui_info "Existing SSH key found: $key_file"
+        ui_info "Dedicated KVKit SSH key found: $key_file"
     fi
 }
 
 function ssh_distribute_key() {
     local host="$1"
-    local key_file="${HOME}/.ssh/id_ed25519.pub"
+    local key_file="${KV_KEY_PATH:-${HOME}/.kvkit/keys/id_ed25519}.pub"
     
     if [ ! -f "$key_file" ]; then
         ui_error "Public key not found at $key_file"
