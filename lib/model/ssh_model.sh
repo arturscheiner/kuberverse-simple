@@ -31,12 +31,23 @@ function ssh_distribute_key() {
     ui_info "Sending public key to ${host}..."
     ui_info "Note: You may be prompted for the password of '${host}' once."
     
-    # Manually append public key to authorized_keys
-    if ssh -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '$pub_key' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"; then
-        ui_success "Public key successfully sent to ${host}"
+    # Use ssh-copy-id for standard compliant key distribution
+    ui_info "Step 1: Distributing dedicated public key using ssh-copy-id..."
+    if ! ssh-copy-id -i "${key_file}" -o StrictHostKeyChecking=no "${host}"; then
+        ui_error "Failed to send public key using ssh-copy-id to ${host}. Please check connectivity and credentials."
+        return 1
+    fi
+
+    # Step 2: Configure passwordless sudo for current user using the dedicated key
+    local remote_user=$(whoami)
+    ui_info "Step 2: Configuring passwordless sudo for ${remote_user} on ${host}..."
+    
+    # Use -o IdentitiesOnly=yes to ensure we use the dedicated key we just sent
+    if ssh -i "${KV_KEY_PATH}" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes "$host" "echo '$remote_user ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/kvkit-$(whoami) >/dev/null && sudo chmod 440 /etc/sudoers.d/kvkit-$(whoami)"; then
+        ui_success "Key distribution and sudo automation complete for ${host}"
         return 0
     else
-        ui_error "Failed to send public key to ${host}. Please check connectivity and credentials."
+        ui_error "Failed to configure passwordless sudo on ${host}."
         return 1
     fi
 }
