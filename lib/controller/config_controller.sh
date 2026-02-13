@@ -3,6 +3,7 @@
 # Config Controller for kvkit
 
 source "${LIB_DIR}/model/config.sh"
+source "${LIB_DIR}/model/ssh_model.sh"
 
 function config_execute() {
     ui_info "Starting kvkit configuration..."
@@ -23,4 +24,20 @@ function config_execute() {
     config_save "$k8s_version" "$runtime" "$cni" "$master_domain" "$worker_nodes"
     
     ui_success "Configuration saved to ${CONFIG_FILE}"
+
+    # SSH key automation
+    local do_ssh=$(ui_ask "Would you like to generate and distribute SSH keys to all nodes automatically? (y/n)" "y")
+    if [[ "$do_ssh" =~ ^[Yy]$ ]]; then
+        ssh_ensure_keys
+        
+        ui_info "Distributing keys to master: ${master_domain}"
+        ssh_distribute_key "${master_domain}"
+        
+        for worker in $worker_nodes; do
+            ui_info "Distributing keys to worker: ${worker}"
+            ssh_distribute_key "${worker}"
+        done
+        
+        ui_success "SSH key distribution phase complete."
+    fi
 }
