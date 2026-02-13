@@ -1,13 +1,18 @@
 function bootstrap_ssh_run() {
     local host="$1"
     local script="$2"
+    local capture_file="$3"
     local remote_path="/tmp/kvkit_bootstrap.sh"
     
     ui_info "Transferring bootstrap script to ${host}..."
     scp -o StrictHostKeyChecking=no "$script" "${host}:${remote_path}"
     
     ui_info "Executing remote bootstrap on ${host}..."
-    ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}"
+    if [ -n "$capture_file" ]; then
+        ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}" | tee "$capture_file"
+    else
+        ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}"
+    fi
 }
 
 function bootstrap_remote_sync() {
@@ -57,6 +62,7 @@ function bootstrap_generate_master_script() {
 
 # Master initialization logic
 ui_info "Initializing Kubernetes control plane..."
+# Capture output to find join command later
 kubeadm init --ignore-preflight-errors=NumCPU
 
 mkdir -p \$HOME/.kube
@@ -66,5 +72,22 @@ sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config
 # CNI installation
 ui_info "Installing CNI: $cni"
 $(cat "${LIB_DIR}/modules/cnis/${cni}.sh")
+
+# Generate and print join command for capture
+echo "### KV_JOIN_START ###"
+kubeadm token create --print-join-command --ttl 0
+echo "### KV_JOIN_END ###"
+EOF
+}
+
+function bootstrap_generate_worker_script() {
+    local script_path="$1"
+    local join_command="$2"
+    
+    cat <<EOF >> "$script_path"
+
+# Worker join logic
+ui_info "Joining cluster..."
+$join_command
 EOF
 }
