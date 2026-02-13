@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+
+# kvkit - Kubernetes Cluster Provisioning Tool
+# MVC Architecture Implementation
+
+set -e
+
+# Base directories
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LIB_DIR="${ROOT_DIR}/lib"
+CONFIG_DIR="${HOME}/.kvkit"
+CONFIG_FILE="${CONFIG_DIR}/config"
+
+# Import Core View for UI
+source "${LIB_DIR}/view/ui.sh"
+
+function usage() {
+    echo "Usage: kvkit <command> [options]"
+    echo
+    echo "Commands:"
+    echo "  config              Interactively create or update configuration"
+    echo "  bootstrap --master  Bootstrap a master node"
+    echo "  bootstrap --worker  Bootstrap a worker node"
+    echo
+}
+
+case "$1" in
+    config)
+        source "${LIB_DIR}/controller/config_controller.sh"
+        config_execute
+        ;;
+    bootstrap)
+        source "${LIB_DIR}/controller/bootstrap_controller.sh"
+        bootstrap_execute "$2"
+        ;;
+    *)
+        usage
+        exit 1
+        ;;
+esac
