@@ -42,8 +42,9 @@ function ssh_distribute_key() {
     local remote_user=$(whoami)
     ui_info "Step 2: Configuring passwordless sudo for ${remote_user} on ${host}..."
     
+    # Use -t to ensure a terminal is allocated for the sudo password prompt
     # Use -o IdentitiesOnly=yes to ensure we use the dedicated key we just sent
-    if ssh -i "${KV_KEY_PATH}" -o StrictHostKeyChecking=no -o IdentitiesOnly=yes "$host" "echo '$remote_user ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/kvkit-$(whoami) >/dev/null && sudo chmod 440 /etc/sudoers.d/kvkit-$(whoami)"; then
+    if ssh -i "${KV_KEY_PATH}" -t -o StrictHostKeyChecking=no -o IdentitiesOnly=yes "$host" "echo '$remote_user ALL=(ALL) NOPASSWD:ALL' | sudo tee /etc/sudoers.d/kvkit-$(whoami) >/dev/null && sudo chmod 440 /etc/sudoers.d/kvkit-$(whoami)"; then
         ui_success "Key distribution and sudo automation complete for ${host}"
         return 0
     else
