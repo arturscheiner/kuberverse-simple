@@ -60,22 +60,34 @@ function bootstrap_generate_master_script() {
     
     cat <<EOF >> "$script_path"
 
-# Master initialization logic
-ui_info "Initializing Kubernetes control plane..."
-# Capture output to find join command later
-kubeadm init --ignore-preflight-errors=NumCPU
+# Cluster detection logic
+ui_info "Checking if a Kubernetes control plane is already running..."
+if kubectl get nodes >/dev/null 2>&1 || [ -f /etc/kubernetes/admin.conf ]; then
+    ui_success "Control plane is already running on this heart. Refreshing state."
+else
+    ui_info "No control plane detected. Initializing Kubernetes control plane..."
+    kubeadm init --ignore-preflight-errors=NumCPU
+fi
 
+# Ensure kubeconfig is active for common user
 mkdir -p \$HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf \$HOME/.kube/config
-sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config
+sudo cp -i /etc/kubernetes/admin.conf \$HOME/.kube/config 2>/dev/null || true
+sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config 2>/dev/null || true
 
-# CNI installation
-ui_info "Installing CNI: $cni"
+# Verify kubectl accessibility
+if kubectl get nodes >/dev/null 2>&1; then
+    ui_success "Environment validated: kubectl is operational."
+else
+    ui_warn "kubectl access failed for the current user. Please check permissions."
+fi
+
+# CNI installation (only if not already there, but harmless to re-apply)
+ui_info "Ensuring CNI: $cni"
 $(cat "${LIB_DIR}/modules/cnis/${cni}.sh")
 
 # Generate and print join command for capture
 echo "### KV_JOIN_START ###"
-kubeadm token create --print-join-command --ttl 0
+kubeadm token create --print-join-command --ttl 0 2>/dev/null
 echo "### KV_JOIN_END ###"
 EOF
 }
