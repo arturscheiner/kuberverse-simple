@@ -19,7 +19,7 @@ function bootstrap_execute() {
         --master)
             ui_info "Bootstrapping Master Node: ${MASTER_DOMAIN}"
             local script="/tmp/kvkit_master.sh"
-            bootstrap_generate_base_script "$script" "$KV_RUNTIME"
+            bootstrap_generate_base_script "$script" "$KV_RUNTIME" "$K8S_VERSION"
             bootstrap_generate_master_script "$script" "$KV_CNI"
             bootstrap_ssh_run "$MASTER_DOMAIN" "$script"
             ;;
@@ -28,8 +28,8 @@ function bootstrap_execute() {
             for worker in $WORKER_NODES; do
                 ui_info "Setting up worker: $worker"
                 local script="/tmp/kvkit_worker_${worker}.sh"
-                bootstrap_generate_base_script "$script" "$KV_RUNTIME"
-                # Join logic would go here
+                bootstrap_generate_base_script "$script" "$KV_RUNTIME" "$K8S_VERSION"
+                # Join logic would go here (requires join command from master)
                 bootstrap_ssh_run "$worker" "$script"
             done
             ;;
