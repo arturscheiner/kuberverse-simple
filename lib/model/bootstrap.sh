@@ -70,6 +70,8 @@ function bootstrap_generate_base_script() {
     # Extract UI helpers from ui.sh (omitting the set -e and paths)
     local ui_helpers=$(cat "${LIB_DIR}/view/ui.sh" | grep -v "^source" | grep -v "^ROOT_DIR" | grep -v "^set -e")
 
+    local utc_now=$(date -u +'%Y-%m-%d %H:%M:%S')
+
     cat <<EOF > "$script_path"
 #!/bin/bash
 set -e
@@ -80,7 +82,7 @@ $ui_helpers
 # Configuration variables injected from workstation
 export K8S_VERSION="$version"
 export KV_RUNTIME="$runtime"
-export UTC_NOW="$(date -u +'%Y-%m-%d %H:%M:%S')"
+export UTC_NOW="$utc_now"
 
 # Sync clock to prevent apt update failures
 ui_info "Syncing remote clock with workstation time: ${UTC_NOW} UTC"

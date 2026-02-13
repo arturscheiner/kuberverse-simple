@@ -11,10 +11,11 @@ swapoff -a
 sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
 # Prepare terminal environment
-if ! apt-get update; then
+ui_info "Updating package lists (waiting for DPKG locks if necessary)..."
+if ! apt-get -o DPkg::Lock::Timeout=300 update; then
     ui_warn "apt-get update failed. This is often due to clock drift or network issues. Attempting to proceed anyway..."
 fi
-apt-get install -yq bash-completion binutils apt-transport-https ca-certificates curl gpg git
+apt-get install -o DPkg::Lock::Timeout=300 -yq bash-completion binutils apt-transport-https ca-certificates curl gpg git
 
 # Add Kubernetes repo
 mkdir -p /etc/apt/keyrings
@@ -31,8 +32,8 @@ EOF
 sysctl --system
 
 # Final install
-apt-get update
-apt-get install -yq kubelet kubeadm kubectl kubernetes-cni
+apt-get -o DPkg::Lock::Timeout=300 update
+apt-get install -o DPkg::Lock::Timeout=300 -yq kubelet kubeadm kubectl kubernetes-cni
 apt-mark hold kubelet kubeadm kubectl kubernetes-cni
 
 systemctl enable --now kubelet
