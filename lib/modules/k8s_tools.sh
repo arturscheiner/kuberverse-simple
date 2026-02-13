@@ -12,7 +12,7 @@ sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
 # Prepare terminal environment
 apt-get update
-apt-get install -yq bash-completion binutils apt-transport-https ca-certificates curl gpg
+apt-get install -yq bash-completion binutils apt-transport-https ca-certificates curl gpg git
 
 # Add Kubernetes repo
 mkdir -p /etc/apt/keyrings

@@ -1,7 +1,3 @@
-#!/usr/bin/env bash
-
-# Bootstrap Model for kvkit
-
 function bootstrap_ssh_run() {
     local host="$1"
     local script="$2"
@@ -14,14 +10,32 @@ function bootstrap_ssh_run() {
     ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}"
 }
 
+function bootstrap_remote_sync() {
+    local host="$1"
+    
+    ui_info "Syncing configuration to remote host ${host}..."
+    ssh -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.kvkit"
+    scp -o StrictHostKeyChecking=no "${CONFIG_FILE}" "${host}:~/.kvkit/config"
+    
+    # Optional: Clone repo to remote host
+    ui_info "Setting up kvkit tools on remote host..."
+    ssh -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.kvkit/bin && if [ ! -d ~/.kvkit/bin/kuberverse-simple ]; then git clone https://github.com/arturscheiner/kuberverse-simple.git ~/.kvkit/bin/kuberverse-simple; else cd ~/.kvkit/bin/kuberverse-simple && git pull; fi"
+}
+
 function bootstrap_generate_base_script() {
     local script_path="$1"
     local runtime="$2"
     local version="$3"
     
+    # Extract UI helpers from ui.sh (omitting the set -e and paths)
+    local ui_helpers=$(cat "${LIB_DIR}/view/ui.sh" | grep -v "^source" | grep -v "^ROOT_DIR" | grep -v "^set -e")
+
     cat <<EOF > "$script_path"
 #!/bin/bash
 set -e
+
+# UI Helpers
+$ui_helpers
 
 # Configuration variables injected from workstation
 export K8S_VERSION="$version"

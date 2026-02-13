@@ -22,6 +22,7 @@ function bootstrap_execute() {
             bootstrap_generate_base_script "$script" "$KV_RUNTIME" "$K8S_VERSION"
             bootstrap_generate_master_script "$script" "$KV_CNI"
             bootstrap_ssh_run "$MASTER_DOMAIN" "$script"
+            bootstrap_remote_sync "$MASTER_DOMAIN"
             ;;
         --worker)
             ui_info "Bootstrapping Worker Nodes: ${WORKER_NODES}"
