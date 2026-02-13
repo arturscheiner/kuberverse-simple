@@ -6,9 +6,9 @@ KUBE_VERSION=${K8S_VERSION:-1.28}
 
 echo "Installing Kubernetes tools (version: $KUBE_VERSION)..."
 
-# Disable swap
+# Disable swap permanently
 swapoff -a
-sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+sed -i.bak '/\sswap\s/ s/^\(.*\)$/#\1/g' /etc/fstab
 
 # Prepare terminal environment
 ui_info "Updating package lists (waiting for DPKG locks if necessary)..."
