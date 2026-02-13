@@ -5,9 +5,13 @@
 function bootstrap_ssh_run() {
     local host="$1"
     local script="$2"
+    local remote_path="/tmp/kvkit_bootstrap.sh"
+    
+    ui_info "Transferring bootstrap script to ${host}..."
+    scp -o StrictHostKeyChecking=no "$script" "${host}:${remote_path}"
     
     ui_info "Executing remote bootstrap on ${host}..."
-    ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash -s" < "$script"
+    ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash ${remote_path} && rm ${remote_path}"
 }
 
 function bootstrap_generate_base_script() {
