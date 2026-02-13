@@ -75,11 +75,11 @@ function bootstrap_generate_master_script() {
 # User environment setup (Always refresh)
 ui_info "Ensuring local user environment is configured..."
 mkdir -p \$HOME/.kube
-sudo cp -i /etc/kubernetes/admin.conf \$HOME/.kube/config 2>/dev/null || true
+sudo cp /etc/kubernetes/admin.conf \$HOME/.kube/config 2>/dev/null || true
 sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config 2>/dev/null || true
 
-# Verify kubectl accessibility
-if kubectl get nodes >/dev/null 2>&1; then
+# Verify kubectl accessibility (with timeout)
+if kubectl --request-timeout=5s get nodes >/dev/null 2>&1; then
     ui_success "Environment validated: kubectl is operational."
 else
     if [ "\$KV_SKIP_INSTALL" = "false" ]; then
@@ -87,10 +87,10 @@ else
         kubeadm init --ignore-preflight-errors=NumCPU
         
         # Re-run kubeconfig setup after init
-        sudo cp -i /etc/kubernetes/admin.conf \$HOME/.kube/config
+        sudo cp /etc/kubernetes/admin.conf \$HOME/.kube/config
         sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config
     else
-        ui_error "Control plane should be running but kubectl access failed. Check node status."
+        ui_error "Control plane should be running but kubectl access failed or timed out. Check node status."
     fi
 fi
 
