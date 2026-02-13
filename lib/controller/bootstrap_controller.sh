@@ -29,7 +29,7 @@ function bootstrap_execute() {
             
             # Extract join command
             ui_info "Extracting join command..."
-            local join_cmd=$(sed -n '/### KV_JOIN_START ###/,/### KV_JOIN_END ###/p' "$output_log" | grep "kubeadm join")
+            local join_cmd=$(sed -n '/### KV_JOIN_START ###/,/### KV_JOIN_END ###/p' "$output_log" | grep "kubeadm join" | tr -d '\r' | xargs)
             
             if [ -n "$join_cmd" ]; then
                 ui_success "Join command captured!"

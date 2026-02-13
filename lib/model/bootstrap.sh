@@ -112,7 +112,13 @@ function bootstrap_generate_worker_script() {
     cat <<EOF >> "$script_path"
 
 # Worker join logic
-ui_info "Joining cluster..."
-$join_command
+ui_info "Checking if node is already part of a cluster..."
+if [ -f /etc/kubernetes/kubelet.conf ]; then
+    ui_success "Node is already joined to a cluster. Skipping join."
+else
+    ui_info "Joining cluster..."
+    # Ensure join command is treated as a command with arguments
+    $join_command
+fi
 EOF
 }
