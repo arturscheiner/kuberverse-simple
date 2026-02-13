@@ -36,7 +36,7 @@ function bootstrap_execute() {
             
             if [ -n "$join_cmd" ]; then
                 ui_success "Join command captured!"
-                config_save "$K8S_VERSION" "$KV_RUNTIME" "$KV_CNI" "$MASTER_DOMAIN" "$WORKER_NODES" "$join_cmd"
+                config_save "$K8S_VERSION" "$KV_RUNTIME" "$KV_CNI" "$MASTER_DOMAIN" "$WORKER_NODES" "$CLUSTER_DOMAIN" "$join_cmd"
             else
                 ui_warn "Could not capture join command automatically. You may need to run 'kubeadm token create --print-join-command' on the master."
             fi

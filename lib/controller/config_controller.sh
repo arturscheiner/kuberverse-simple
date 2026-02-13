@@ -20,8 +20,9 @@ function config_execute() {
     
     local master_domain=$(ui_ask "Master node domain/IP" "${MASTER_DOMAIN:-ks-master-0}")
     local worker_nodes=$(ui_ask "Worker nodes (space separated)" "${WORKER_NODES:-ks-worker-0 ks-worker-1}")
+    local cluster_domain=$(ui_ask "Cluster local domain" "${CLUSTER_DOMAIN:-cluster.local}")
 
-    config_save "$k8s_version" "$runtime" "$cni" "$master_domain" "$worker_nodes"
+    config_save "$k8s_version" "$runtime" "$cni" "$master_domain" "$worker_nodes" "$cluster_domain"
     
     ui_success "Configuration saved to ${CONFIG_FILE}"
 

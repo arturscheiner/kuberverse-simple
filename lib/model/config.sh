@@ -17,7 +17,8 @@ function config_save() {
     local cni="$3"
     local master_domain="$4"
     local worker_nodes="$5"
-    local join_command="$6"
+    local cluster_domain="$6"
+    local join_command="$7"
 
     mkdir -p "$CONFIG_DIR"
     {
@@ -26,6 +27,7 @@ function config_save() {
         echo "KV_CNI=\"$cni\""
         echo "MASTER_DOMAIN=\"$master_domain\""
         echo "WORKER_NODES=\"$worker_nodes\""
+        echo "CLUSTER_DOMAIN=\"$cluster_domain\""
         [ -z "$join_command" ] || echo "JOIN_COMMAND=\"$join_command\""
     } > "$CONFIG_FILE"
 }
