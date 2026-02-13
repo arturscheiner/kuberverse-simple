@@ -45,7 +45,7 @@ function bootstrap_local_setup() {
     chmod 600 "${HOME}/.kube/config"
     
     # Cleanup remote temporary file
-    ssh -o StrictHostKeyChecking=no "$host" "rm /tmp/kvkit_admin.conf"
+    ssh -o StrictHostKeyChecking=no "$host" "sudo rm /tmp/kvkit_admin.conf"
     
     # 2. Grab kubectl from control-plane
     ui_info "Grabbing kubectl from ${host}..."
@@ -55,7 +55,8 @@ function bootstrap_local_setup() {
     
     # Inform about PATH
     if [[ ":$PATH:" != *":${bin_dir}:"* ]]; then
-        ui_warn "${bin_dir} is not in your PATH. You may need to add it: export PATH=\$PATH:${bin_dir}"
+        ui_warn "IMPORTANT: ${bin_dir} is not in your PATH."
+        ui_warn "To fix this, run: echo 'export PATH=\$PATH:${bin_dir}' >> ~/.bashrc && source ~/.bashrc"
     fi
     
     ui_success "Local setup complete! Try running 'kubectl get nodes'."
