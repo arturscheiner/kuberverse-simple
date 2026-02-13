@@ -44,8 +44,8 @@ function bootstrap_local_setup() {
     scp -o StrictHostKeyChecking=no "${host}:/tmp/kvkit_admin.conf" "${HOME}/.kube/config"
     chmod 600 "${HOME}/.kube/config"
     
-    # Cleanup remote temporary file
-    ssh -o StrictHostKeyChecking=no "$host" "sudo rm /tmp/kvkit_admin.conf"
+    # Cleanup remote temporary file (uses -t for sudo password if needed)
+    ssh -t -o StrictHostKeyChecking=no "$host" "sudo rm /tmp/kvkit_admin.conf"
     
     # 2. Grab kubectl from control-plane
     ui_info "Grabbing kubectl from ${host}..."
