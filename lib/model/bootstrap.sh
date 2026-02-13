@@ -27,6 +27,32 @@ function bootstrap_remote_sync() {
     ssh -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.kvkit/bin && if [ ! -d ~/.kvkit/bin/kuberverse-simple ]; then git clone https://github.com/arturscheiner/kuberverse-simple.git ~/.kvkit/bin/kuberverse-simple; else cd ~/.kvkit/bin/kuberverse-simple && git pull; fi"
 }
 
+function bootstrap_local_setup() {
+    local host="$1"
+    local bin_dir="${HOME}/.local/bin"
+    
+    ui_info "Setting up local workstation for cluster ${host}..."
+    
+    # 1. Sync kubeconfig
+    ui_info "Downloading kubeconfig from ${host}..."
+    mkdir -p "${HOME}/.kube"
+    scp -o StrictHostKeyChecking=no "${host}:~/.kube/config" "${HOME}/.kube/config"
+    
+    # 2. Grab kubectl from control-plane
+    ui_info "Grabbing kubectl from ${host}..."
+    mkdir -p "${bin_dir}"
+    # Use sudo scp if necessary, but usually kubectl is world-readable
+    scp -o StrictHostKeyChecking=no "${host}:/usr/bin/kubectl" "${bin_dir}/kubectl"
+    chmod +x "${bin_dir}/kubectl"
+    
+    # Inform about PATH
+    if [[ ":$PATH:" != *":${bin_dir}:"* ]]; then
+        ui_warn "${bin_dir} is not in your PATH. You may need to add it: export PATH=\$PATH:${bin_dir}"
+    fi
+    
+    ui_success "Local setup complete! Try running 'kubectl get nodes'."
+}
+
 function bootstrap_generate_base_script() {
     local script_path="$1"
     local runtime="$2"

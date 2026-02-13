@@ -38,6 +38,13 @@ function bootstrap_execute() {
                 ui_warn "Could not capture join command automatically. You may need to run 'kubeadm token create --print-join-command' on the master."
             fi
             ;;
+        --local)
+            if [ -z "$MASTER_DOMAIN" ]; then
+                ui_error "No master domain found. Run 'kvkit config' first."
+                exit 1
+            fi
+            bootstrap_local_setup "$MASTER_DOMAIN"
+            ;;
         --worker)
             if [ -z "$JOIN_COMMAND" ]; then
                 ui_error "Worker bootstrap requires a JOIN_COMMAND. Please bootstrap the master node first."

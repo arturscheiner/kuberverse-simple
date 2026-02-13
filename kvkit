@@ -20,6 +20,7 @@ function usage() {
     echo "Commands:"
     echo "  config              Interactively create or update configuration"
     echo "  bootstrap --master  Bootstrap a master node"
+    echo "  bootstrap --local   Setup local workstation (sync kubectl/config)"
     echo "  bootstrap --worker  Bootstrap a worker node"
     echo
 }
