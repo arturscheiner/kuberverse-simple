@@ -7,7 +7,7 @@ function bootstrap_ssh_run() {
     local script="$2"
     
     ui_info "Executing remote bootstrap on ${host}..."
-    ssh -o StrictHostKeyChecking=no "$host" "sudo bash -s" < "$script"
+    ssh -t -o StrictHostKeyChecking=no "$host" "sudo bash -s" < "$script"
 }
 
 function bootstrap_generate_base_script() {
