@@ -23,7 +23,7 @@ function ssh_distribute_key() {
     ui_info "Note: You may be prompted for the password of '${host}' once."
     
     # Use ssh-copy-id with StrictHostKeyChecking=no to avoid being blocked by host validation
-    if ssh-copy-id -o StrictHostKeyChecking=no "$host" >/dev/null 2>&1; then
+    if ssh-copy-id -o StrictHostKeyChecking=no "$host"; then
         ui_success "Public key successfully sent to ${host}"
         return 0
     else
