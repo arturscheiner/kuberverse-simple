@@ -46,11 +46,23 @@ $ui_helpers
 export K8S_VERSION="$version"
 export KV_RUNTIME="$runtime"
 
-# Core Setup
-$(cat "${LIB_DIR}/modules/k8s_tools.sh")
+# Cluster detection logic
+ui_info "Checking if a Kubernetes control plane or tools are already installed..."
+if command -v kubeadm >/dev/null 2>&1 && ([ -f /etc/kubernetes/admin.conf ] || kubectl get nodes >/dev/null 2>&1); then
+    ui_success "Kubernetes detected. Skipping core installation."
+    export KV_SKIP_INSTALL=true
+else
+    ui_info "No installation detected. Proceeding with full setup."
+    export KV_SKIP_INSTALL=false
+fi
 
-# Container Runtime Setup
-$(cat "${LIB_DIR}/modules/runtimes/${runtime}.sh")
+# Core Setup (Skip if detected)
+if [ "\$KV_SKIP_INSTALL" = "false" ]; then
+    $(cat "${LIB_DIR}/modules/k8s_tools.sh")
+    
+    # Container Runtime Setup
+    $(cat "${LIB_DIR}/modules/runtimes/${runtime}.sh")
+fi
 EOF
 }
 
@@ -60,16 +72,8 @@ function bootstrap_generate_master_script() {
     
     cat <<EOF >> "$script_path"
 
-# Cluster detection logic
-ui_info "Checking if a Kubernetes control plane is already running..."
-if kubectl get nodes >/dev/null 2>&1 || [ -f /etc/kubernetes/admin.conf ]; then
-    ui_success "Control plane is already running on this heart. Refreshing state."
-else
-    ui_info "No control plane detected. Initializing Kubernetes control plane..."
-    kubeadm init --ignore-preflight-errors=NumCPU
-fi
-
-# Ensure kubeconfig is active for common user
+# User environment setup (Always refresh)
+ui_info "Ensuring local user environment is configured..."
 mkdir -p \$HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf \$HOME/.kube/config 2>/dev/null || true
 sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config 2>/dev/null || true
@@ -78,7 +82,16 @@ sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config 2>/dev/null || true
 if kubectl get nodes >/dev/null 2>&1; then
     ui_success "Environment validated: kubectl is operational."
 else
-    ui_warn "kubectl access failed for the current user. Please check permissions."
+    if [ "\$KV_SKIP_INSTALL" = "false" ]; then
+        ui_info "Initializing Kubernetes control plane..."
+        kubeadm init --ignore-preflight-errors=NumCPU
+        
+        # Re-run kubeconfig setup after init
+        sudo cp -i /etc/kubernetes/admin.conf \$HOME/.kube/config
+        sudo chown \$(id -u):\$(id -g) \$HOME/.kube/config
+    else
+        ui_error "Control plane should be running but kubectl access failed. Check node status."
+    fi
 fi
 
 # CNI installation (only if not already there, but harmless to re-apply)
