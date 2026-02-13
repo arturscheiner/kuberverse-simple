@@ -24,7 +24,10 @@ function bootstrap_execute() {
             bootstrap_generate_base_script "$script" "$KV_RUNTIME" "$K8S_VERSION"
             bootstrap_generate_master_script "$script" "$KV_CNI"
             
-            bootstrap_ssh_run "$MASTER_DOMAIN" "$script" "$output_log"
+            if ! bootstrap_ssh_run "$MASTER_DOMAIN" "$script" "$output_log"; then
+                ui_error "Bootstrap failed on ${MASTER_DOMAIN}. See ${output_log} for details."
+                exit 1
+            fi
             bootstrap_remote_sync "$MASTER_DOMAIN"
             
             # Extract join command
@@ -57,7 +60,10 @@ function bootstrap_execute() {
                 local script="/tmp/kvkit_worker_${worker}.sh"
                 bootstrap_generate_base_script "$script" "$KV_RUNTIME" "$K8S_VERSION"
                 bootstrap_generate_worker_script "$script" "$JOIN_COMMAND"
-                bootstrap_ssh_run "$worker" "$script"
+                if ! bootstrap_ssh_run "$worker" "$script"; then
+                    ui_error "Bootstrap failed on worker: ${worker}"
+                    exit 1
+                fi
             done
             ;;
         *)

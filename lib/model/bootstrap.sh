@@ -80,6 +80,11 @@ $ui_helpers
 # Configuration variables injected from workstation
 export K8S_VERSION="$version"
 export KV_RUNTIME="$runtime"
+export UTC_NOW="$(date -u +'%Y-%m-%d %H:%M:%S')"
+
+# Sync clock to prevent apt update failures
+ui_info "Syncing remote clock with workstation time: ${UTC_NOW} UTC"
+date -s "${UTC_NOW}" >/dev/null 2>&1 || ui_warn "Failed to set system date. apt update might fail."
 
 # Cluster detection logic
 ui_info "Checking if a Kubernetes control plane or tools are already installed..."
