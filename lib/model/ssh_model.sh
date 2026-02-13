@@ -18,12 +18,20 @@ function ssh_ensure_keys() {
 
 function ssh_distribute_key() {
     local host="$1"
+    local key_file="${HOME}/.ssh/id_ed25519.pub"
+    
+    if [ ! -f "$key_file" ]; then
+        ui_error "Public key not found at $key_file"
+        return 1
+    fi
+
+    local pub_key=$(cat "$key_file")
     
     ui_info "Sending public key to ${host}..."
     ui_info "Note: You may be prompted for the password of '${host}' once."
     
-    # Use ssh-copy-id with StrictHostKeyChecking=no to avoid being blocked by host validation
-    if ssh-copy-id -o StrictHostKeyChecking=no "$host"; then
+    # Manually append public key to authorized_keys
+    if ssh -o StrictHostKeyChecking=no "$host" "mkdir -p ~/.ssh && chmod 700 ~/.ssh && echo '$pub_key' >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"; then
         ui_success "Public key successfully sent to ${host}"
         return 0
     else
