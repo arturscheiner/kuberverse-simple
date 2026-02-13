@@ -33,15 +33,23 @@ function bootstrap_local_setup() {
     
     ui_info "Setting up local workstation for cluster ${host}..."
     
-    # 1. Sync kubeconfig
+    # 1. Sync kubeconfig (safe transfer via /tmp)
     ui_info "Downloading kubeconfig from ${host}..."
     mkdir -p "${HOME}/.kube"
-    scp -o StrictHostKeyChecking=no "${host}:~/.kube/config" "${HOME}/.kube/config"
+    
+    # Prepare a temporary readable copy on the remote side
+    ssh -t -o StrictHostKeyChecking=no "$host" "sudo cp /etc/kubernetes/admin.conf /tmp/kvkit_admin.conf && sudo chmod 644 /tmp/kvkit_admin.conf"
+    
+    # Download the temporary file
+    scp -o StrictHostKeyChecking=no "${host}:/tmp/kvkit_admin.conf" "${HOME}/.kube/config"
+    chmod 600 "${HOME}/.kube/config"
+    
+    # Cleanup remote temporary file
+    ssh -o StrictHostKeyChecking=no "$host" "rm /tmp/kvkit_admin.conf"
     
     # 2. Grab kubectl from control-plane
     ui_info "Grabbing kubectl from ${host}..."
     mkdir -p "${bin_dir}"
-    # Use sudo scp if necessary, but usually kubectl is world-readable
     scp -o StrictHostKeyChecking=no "${host}:/usr/bin/kubectl" "${bin_dir}/kubectl"
     chmod +x "${bin_dir}/kubectl"
     
